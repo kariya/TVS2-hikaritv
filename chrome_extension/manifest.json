@@ -1,0 +1,15 @@
+{
+  "name": "HikariTV plugin",
+  "version": "0.1.0",
+  "description": "Fetch HikariTV program table",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "popup": "popup.html"
+  },
+  //"background_page": "background.html",
+  "permissions": [
+    "http://www.hikaritv.net/*",
+    "https://app.hikaritv.net/*",
+    "http://localhost:*/"
+  ]
+}

@@ -1,0 +1,164 @@
+<html>
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+	(function ($) {
+		$(function () {
+			var channels = location.href.substring(location.href.lastIndexOf('=') + 1).split(',');
+			var loggerPort = location.href.substring(location.href.indexOf('=') + 1).replace(/&ch=.*$/, '');
+			function f(i) {
+				if (i >= channels.length) {
+					$.post(
+						'http://localhost:' + loggerPort + '/', 
+						"END",
+						function () {
+							window.close();
+						}
+					);
+					return;
+				}
+				var ch = channels[i];
+				var url = 'http://www.hikaritv.net/search/tv/request/00/tv_epg_weekly/timeRange=24&dayRange=8&serviceID=' + ch + '&chRange=1&selCh=' + ch + '.html';
+				//var url = 'http://www.hikaritv.net/search/tv/request/00/tv_epg_weekly/timeRange%3D24%26dayRange%3D8%26serviceID%3D' + ch + '%26chRange%3D1%26selCh%3D' + ch + '.html';
+				
+				var result = "";
+
+				var jobs = null;
+
+				$.ajax({
+					url: url,
+					type: 'GET',
+					async: false,
+					dataType: 'text',
+				    success: function (data) {
+						jobs = $.makeArray($(data).find('.topHead ~ tr td p > a')); //.slice(0, 10);
+					},
+					error: function (x,y,z) {
+						console.log('NG:' + z);
+					}
+				});
+
+				function getJob() {
+					if (jobs.length == 0) return null;
+					return jobs.pop();
+				}
+				
+				function getURL(job) {
+					var href = job.attr('href');
+					return 'http://www.hikaritv.net' + href.substring(href.indexOf('/'));
+				}
+
+				function getCrid(job) {
+					var href = job.attr('href');
+					return href.replace(/^.*crid%3D/, '').replace(/\.html/, '');
+				}
+
+				function getCsv(data, crid) {
+					var d = $(data);
+
+					var title = d.find('.h2C02 h2:eq(0)').text().toString().replace('の紹介', '');
+					var time = d.find('.introBox dd:eq(0) strong').text();
+					var channel = d.find('.introBox dd:eq(1) strong').text().replace(/^[^0-9]*/, '').replace(/[^0-9]*$/, '');
+					var url = d.find('.introBox dd:eq(2) a').text();
+					var category = d.find('.introBox dd:eq(3)').text();
+					var description = d.find('.introBox dd:eq(4)').text(); //.replace(",", "，");
+					var gcode = '';
+					var priority = 0;
+					var reserve = '';
+										
+					if (channel.toString() == '') return '';
+					
+					// 2012年02月24日（金）　04:00～04:30
+					var starttime = time.substring(8, 10) + '/' + time.substring(5, 7) + '/' + time.substring(0, 4) + ' ' + time.substring(15, 20) + ':00';
+					var endtime = time.substring(8, 10) + '/' + time.substring(5, 7) + '/' + time.substring(0, 4) + ' ' + time.substring(21, 26) + ':00';
+
+					var csv =
+						'"' + starttime + '"'
+						+ ',"' + channel + '."'
+						+ ',"' + endtime + '"'
+						+ ',"' + title + '"'
+						+ ',"' + description + ' [' + crid + ']"'
+						+ ',"' + category + '"'
+						+ ',"' + url + '"'
+						+ ',"' + gcode + '"'
+						+ ',' + priority
+						+ ',"' + reserve + '"'
+						+ ','
+						;
+					
+					return csv;
+				}
+
+				var N = 5;
+				var nWorkers = N;
+				var workers = [];
+
+				function output(line) {
+					if (line == '') return;
+					//$('#box').html('<iframe src="hikaritv:' + encodeURI(line) + '"/>');
+					result += line + "\n";
+					//throw "end";
+				}
+				
+				function makeWorker(self) {
+					var isLoading = false;
+					var done = false;
+					return function () {
+						if (done) {
+							if (nWorkers == 0) {
+								//console.log(result);
+								$.ajax({url: 'http://localhost:' + loggerPort + '/', type: 'POST', data: result, async: false});
+								f(i + 1);
+								return false;
+							}
+						} else if (!isLoading) {
+							var job = $(getJob());
+							if (job .length == 0) {
+								done = true;
+								nWorkers--;
+							} else {
+								$.ajax({
+									url: getURL(job),
+									type: 'GET',
+									async: true,
+									dataType: 'text',
+									cache: true,
+									success: function (data) {
+										//$('#result').append(getCsv(data)); $('#result').append($('<br/>'));
+										output(getCsv(data, getCrid(job)));
+										isLoading = false;
+										job = null;
+									},
+									error: function (x,y,z) {
+										console.log('NG:' + x + y + z);
+										isLoading = false;
+										job = null;
+									}
+								});
+								isLoading = true; 
+							}
+						}
+						var next = (self + 1) % N;
+						setTimeout(workers[next], 10);
+
+						return true;
+					};
+				}
+
+				for (var j = 0; j < N; ++j) {
+					workers.push(makeWorker(j));
+				}
+				//result = "";
+				workers[0]();
+			}
+			f(0);
+		});
+	}(window.$));
+</script>
+
+<body>
+<div id="box"/>
+<div id="result"/>
+</body>
+</html>
+
+  

@@ -1,0 +1,70 @@
+<html>
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+	$ = jQuery = window.jQuery;
+</script>
+<!--
+<script type="text/javascript" src="jquery.cookie.js"></script>
+-->
+<script type="text/javascript" src="jquery.form.js"></script>
+<script type="text/javascript">
+	var crid = location.href.replace(/^.*crid=/, '');
+	var url = 'http://www.hikaritv.net/member/remote/reserve/confirm/program?cridList=' + crid + '&loginwindow=sub';
+
+	function go(res) {
+		var key = $(res).find('input[name="csrfkey"]').val();
+		$.post(
+			"http://www.hikaritv.net/member/remote/reserve/complete/program", 
+			{
+				reserveType: "2",
+				prgTitleList: "",
+				//loop: "4",
+				cridList: crid,
+				serviceType: "1",
+				//parental: "17",
+				//loginwindow: "sub",
+				csrfkey: key 
+			},
+			function (d) {
+//				console.log(d);
+				window.close();
+			}
+		);
+	}
+
+	$(function () {	
+		$.ajax({
+			url: url,
+			async: false,
+			success: function (data) {
+				var elem = document.createElement('div');
+				elem.innerHTML = data;
+		    	var form = $(elem).find('#exelogin');
+
+				if (form.length != 0) {
+					form.find('input[name="userId_login"]').val('USERNAME');
+					form.find('input[name="passwd_login"]').val('PASSWORD');
+					//form.find('input[type=image]').click();
+					form.ajaxSubmit({
+						async: false,
+						success: function (res, status, xhr) {
+							go(res);
+						}
+					});
+				} else {
+					go(data);
+				}
+			}
+		});
+	});
+
+
+
+
+
+</script>
+
+<body>
+</body>
+</html>
+

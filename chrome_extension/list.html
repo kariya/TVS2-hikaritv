@@ -1,0 +1,77 @@
+<html>
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+	$ = jQuery = window.jQuery;
+</script>
+<!--
+<script type="text/javascript" src="jquery.cookie.js"></script>
+-->
+<script type="text/javascript" src="jquery.form.js"></script>
+<script type="text/javascript">
+	var url = 'http://www.hikaritv.net/member/remote/reserve/list?disp=before';
+	var loggerPort = location.href.substring(location.href.indexOf('=') + 1);
+	
+	function go(res) {
+		var records = $(res).find('table.MyPageTable01 tr:not(:first)');
+		records.each(function () {
+			var datetime = $(this).find('td:eq(1)').text().trim();
+			var title = $(this).find('td:eq(2)').text().trim();
+			var ch = $(this).find('td:eq(3)').text().replace(/^.*Ch/,'').replace(/[^0-9]*$/, '') + ".";
+			
+			// 03/01(ñÿ) 13:00 Å` 13:22
+			var year = '2012'; //TODO
+			var month = datetime.substr(0, 2);
+			var day = datetime.substr(3, 2);
+			var start = datetime.substr(9, 5);
+			var end = datetime.substr(17, 5);
+			
+			var result = 
+				'Content-type: application/x-tv-program-info; charset=shift_jis'
+				+ '\nversion: 1'
+				+ '\nstation: ' + ch
+				+ '\nyear: ' + year
+				+ '\nmonth: ' + month
+				+ '\ndate: ' + day
+				+ '\nstart: ' + start
+				+ '\nend: ' + end
+				+ '\nprogram-title: ' + title
+				+ '\n\n'
+			
+//			console.log(result);
+			$.ajax({url: 'http://localhost:' + loggerPort + '/', type: 'POST', data: result, async: false});
+		});
+		$.ajax({url: 'http://localhost:' + loggerPort + '/', type: 'POST', data: 'END', async: false});
+		window.close();
+	}
+
+	$(function () {	
+		$.ajax({
+			url: url,
+			async: false,
+			success: function (data) {
+				var elem = document.createElement('div');
+				elem.innerHTML = data;
+		    	var form = $(elem).find('#exelogin');
+
+				if (form.length != 0) {
+					form.find('input[name="userId_login"]').val('USERNAME');
+					form.find('input[name="passwd_login"]').val('PASSWORD');
+					//form.find('input[type=image]').click();
+					form.ajaxSubmit({
+						async: false,
+						success: function (res, status, xhr) {
+							go(res);
+						}
+					});
+				} else {
+					go(data);
+				}
+			}
+		});
+	});
+</script>
+
+<body>
+</body>
+</html>
+
