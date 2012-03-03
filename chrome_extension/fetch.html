@@ -5,6 +5,9 @@
 		$(function () {
 			var channels = location.href.substring(location.href.lastIndexOf('=') + 1).split(',');
 			var loggerPort = location.href.substring(location.href.indexOf('=') + 1).replace(/&ch=.*$/, '');
+
+			$('#result').append('<ol/>');
+
 			function f(i) {
 				if (i >= channels.length) {
 					$.post(
@@ -20,9 +23,11 @@
 				var url = 'http://www.hikaritv.net/search/tv/request/00/tv_epg_weekly/timeRange=24&dayRange=8&serviceID=' + ch + '&chRange=1&selCh=' + ch + '.html';
 				//var url = 'http://www.hikaritv.net/search/tv/request/00/tv_epg_weekly/timeRange%3D24%26dayRange%3D8%26serviceID%3D' + ch + '%26chRange%3D1%26selCh%3D' + ch + '.html';
 				
-				var result = "";
+				$('#result ol').append('<li>channel ' + ch + '</li>');
 
+				var result = "";
 				var jobs = null;
+				var allJobNum = 0;
 
 				$.ajax({
 					url: url,
@@ -31,6 +36,7 @@
 					dataType: 'text',
 				    success: function (data) {
 						jobs = $.makeArray($(data).find('.topHead ~ tr td p > a')); //.slice(0, 10);
+						allJobNum = jobs.length;
 					},
 					error: function (x,y,z) {
 						console.log('NG:' + z);
@@ -123,7 +129,7 @@
 									dataType: 'text',
 									cache: true,
 									success: function (data) {
-										//$('#result').append(getCsv(data)); $('#result').append($('<br/>'));
+										$('#result ol li:last').text('channel ' + ch + ' (' + (allJobNum - jobs.length) + '/' + allJobNum + ')');
 										output(getCsv(data, getCrid(job)));
 										isLoading = false;
 										job = null;
