@@ -54,4 +54,4 @@ goto end
 
 
 :end
-pause
+rem pause

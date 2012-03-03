@@ -74,8 +74,23 @@
 					if (channel.toString() == '') return '';
 					
 					// 2012年02月24日（金）　04:00～04:30
-					var starttime = time.substring(8, 10) + '/' + time.substring(5, 7) + '/' + time.substring(0, 4) + ' ' + time.substring(15, 20) + ':00';
-					var endtime = time.substring(8, 10) + '/' + time.substring(5, 7) + '/' + time.substring(0, 4) + ' ' + time.substring(21, 26) + ':00';
+					var year = time.substring(0, 4);
+					var month = time.substring(5, 7);
+					var day = time.substring(8, 10);
+					var startHHMM = time.substring(15, 20);
+					var endHHMM = time.substring(21, 26)
+					
+					var starttime = day + '/' + month + '/' + year + ' ' + startHHMM + ':00';
+					if (endHHMM.match(/00../)) {
+						var nextDate = new Date(year + "/" + month + "/" + (parseInt(day) + 1));
+						year = nextDate.getYear();
+						if (year < 2000) year += 1900;
+						month = nextDate.getMonth() + 1;
+						if (month < 10) month = "0" + month;
+						day = nextDate.getDate();
+						if (day < 10) day = "0" + day;
+					}
+					var endtime = day + '/' + month + '/' + year + ' ' + endHHMM + ':00';
 
 					var csv =
 						'"' + starttime + '"'
