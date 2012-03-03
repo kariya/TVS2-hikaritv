@@ -1,11 +1,11 @@
 @ECHO OFF
 set CH_LIST=350,351,352,380,821
 set TVS_HOME=c:\Tool\tvs21230
-set EXTENSION_ID=mclgockfjnhckopglabjdikdpilpglfd
+set EXTENSION_ID=mkicbjnlokclljijikfgfjaocbamoofg
 set PLUGINDIR=hikaritv
 set CSV=../tvdata1.csv
 set PORT=10260
-set CHROME="%USERPROFILE%/Local Settings/Application Data/Google/Chrome/Application/chrome.exe"
+set CHROME="%USERPROFILE%/Local Settings/Application Data/Google/Chrome/Application/chrome.exe" --new-window
 set JAVA_HOME=C:/Program Files/Java/jre6
 set JAVA="%JAVA_HOME%/bin/java"
 set JRUBY_JAR=%PLUGINDIR%/jruby-complete-1.6.7.jar
@@ -14,8 +14,8 @@ set CMD=cmd.exe
 set NKF=%PLUGINDIR%\nkf32.exe
 set TMPCSV=%PLUGINDIR%\tmp.csv
 set TMPBAT=%PLUGINDIR%\tmp.bat
-set TMPEPG=%PLUGINDIR%\tmp.tvpi
-set EPG=%2
+set TMPEPG=%PLUGINDIR%\tmp*.tvpi
+set EPGDIR=%2
 
 
 c:
@@ -49,7 +49,9 @@ goto end
 DEL %TMPEPG%
 %CHROME% "chrome-extension://%EXTENSION_ID%/list.html?loggerPort=%PORT%"
 %JRUBY% %PLUGINDIR%/logger.rb %PORT% %TMPEPG%
-%NKF% -s %TMPEPG% > %EPG%\epg.tvpi
+IF NOT EXIST %TMPEPG% goto end
+FOR %%A IN (%TMPEPG%) DO %NKF% -s --in-place %%A 
+COPY %TMPEPG% %EPGDIR%
 goto end
 
 

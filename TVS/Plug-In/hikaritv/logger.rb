@@ -3,6 +3,7 @@ $KCODE = 's'
 require "socket"
 
 l0 = TCPServer.open(ARGV[0].to_i)
+seq = 0
 
 while true 
    l = l0.accept
@@ -32,7 +33,8 @@ while true
       break;
    end
    
-   File.open(ARGV[1], 'a') { |f|
+   File.open(ARGV[1].sub('*', seq.to_s), 'a') { |f|
+      seq += 1
       f.puts(data)
       f.close
       print "...ÇPåèèIóπ\n"
