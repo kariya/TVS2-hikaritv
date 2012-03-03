@@ -22,7 +22,7 @@
 
 ## インストール方法
 ### Chrome拡張導入
-chrome_extension/list.html および chrome_extension/record.htmlの中のUSERNAMEとPASSWORDを
+chrome_extension/config.jsの中のUSERNAMEとPASSWORDを
 ひかりTVのユーザー名及びパスワードに書き換えます。（今のところ平文です）
 
 Chromeのレンチアイコンより「オプション」→「拡張機能」を選択し、

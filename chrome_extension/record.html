@@ -7,6 +7,7 @@
 <script type="text/javascript" src="jquery.cookie.js"></script>
 -->
 <script type="text/javascript" src="jquery.form.js"></script>
+<script type="text/javascript" src="config.js"></script>
 <script type="text/javascript">
 	var crid = location.href.replace(/^.*crid=/, '');
 	var url = 'http://www.hikaritv.net/member/remote/reserve/confirm/program?cridList=' + crid + '&loginwindow=sub';
@@ -42,8 +43,8 @@
 		    	var form = $(elem).find('#exelogin');
 
 				if (form.length != 0) {
-					form.find('input[name="userId_login"]').val('USERNAME');
-					form.find('input[name="passwd_login"]').val('PASSWORD');
+					form.find('input[name="userId_login"]').val(config.username);
+					form.find('input[name="passwd_login"]').val(config.password);
 					//form.find('input[type=image]').click();
 					form.ajaxSubmit({
 						async: false,
