@@ -21,6 +21,10 @@
 
 
 ## インストール方法
+### ファイル設置
+TVS/ 以下をTVスケージューラーをインストールしたディレクトリに置きます。
+chrome_extension/ は適当な場所に置きます。
+
 ### Chrome拡張導入
 chrome_extension/config.jsの中のUSERNAMEとPASSWORDを
 ひかりTVのユーザー名及びパスワードに書き換えます。（今のところ平文です）
