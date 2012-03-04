@@ -84,7 +84,7 @@
 					var category = d.find('.introBox dd:eq(3)').text();
 					var description = d.find('.introBox dd:eq(4)').text(); //.replace(",", "，");
 					var gcode = '';
-					var priority = 0;
+					var priority = 0 | (1 << 28);
 					var reserve = '';
 										
 					if (channel.toString() == '') return '';
