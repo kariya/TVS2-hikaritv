@@ -1,6 +1,7 @@
 var config = {
 	username: "USERNAME",
-	password: "PASSWORD"
+	password: "PASSWORD",
+	numWorker: 5
 };
 
 
