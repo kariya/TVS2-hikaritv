@@ -1,5 +1,5 @@
 @ECHO OFF
-set CH_LIST=350,351,352,380,821
+set CH_LIST=350,351,352,380,821,450,451,452,453,455,456
 set TVS_HOME=c:\Tool\tvs21230
 set EXTENSION_ID=mkicbjnlokclljijikfgfjaocbamoofg
 set PLUGINDIR=hikaritv
@@ -15,6 +15,7 @@ set NKF=%PLUGINDIR%\nkf32.exe
 set TMPCSV=%PLUGINDIR%\tmp.csv
 set TMPBAT=%PLUGINDIR%\tmp.bat
 set TMPEPG=%PLUGINDIR%\tmp*.tvpi
+set EPG=%2
 set EPGDIR=%2
 
 
