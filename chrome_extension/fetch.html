@@ -13,14 +13,26 @@
 			$('#result').append('<ol/>');
 
 			function f(i) {
+				if (i == -1) {
+					var header = '"開始時間","チャンネル","終了時間","番組名","内容","カテゴリー","URL","GCODE",優先度,"文字予備",空列\n';
+					$.ajax({
+						url: 'http://localhost:' + loggerPort + '/', 
+						type: 'POST',
+						async: false,
+						data: header
+					});
+					f(0);
+					return;
+				}
+
 				if (i >= channels.length) {
-					$.post(
-						'http://localhost:' + loggerPort + '/', 
-						"END",
-						function () {
-							window.close();
-						}
-					);
+					$.ajax({
+						url: 'http://localhost:' + loggerPort + '/', 
+						type: 'POST',
+						async: false,
+						data: "END"
+					});
+					window.close();
 					return;
 				}
 				var ch = channels[i];
@@ -175,10 +187,11 @@
 				//result = "";
 				workers[0]();
 			}
-			f(0);
+			setTimeout(function () { f(-1); }, 2000);
 		});
 	}(window.$));
 </script>
+</head>
 
 <body>
 <div id="box"/>
