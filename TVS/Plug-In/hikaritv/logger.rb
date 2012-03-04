@@ -37,7 +37,7 @@ while true
       seq += 1
       f.puts(data)
       f.close
-      print "...‚PŒI—¹\n"
+      # print "...‚PŒI—¹\n"
    }
 end
 
