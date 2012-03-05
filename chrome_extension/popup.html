@@ -1,11 +1,29 @@
-<!-- chrome-extension://ID/popup.html?... -->
 <html>
 <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
 <script type="text/javascript">
 	$ = jQuery = window.jQuery;
+	$(function () {
+		if (!localStorage["username"]) {
+			$('#setup').text('ユーザー名・パスワードは未入力です。設定画面から登録してください。');
+		} else {
+			$('#setup').text('ユーザー名・パスワード登録済みです。');
+		}
+	});
 </script>
 
+<style>
+body {
+	width: 360px;
+	height: 240px;
+}
+</style>
+
 <body>
+<h1>ひかりTVプラグイン</h1>
+特にこの画面ですることはありません。
+<span id="setup"/>
+<br>
+
 </body>
 </html>
 
