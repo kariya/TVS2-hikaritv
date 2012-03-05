@@ -64,6 +64,7 @@ Chromeのレンチアイコンより「オプション」→「拡張機能」�
 + nkf
 + JQuery
 + jquery.form
++ [プログレスバー.js](http://www.html5.jp/library/progress.html)
 
 ## ライセンス
 BSDライセンス

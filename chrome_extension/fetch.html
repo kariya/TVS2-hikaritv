@@ -4,13 +4,26 @@
 <meta charset="UTF-8" />
 <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
 <script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="progress.js"></script>
 <script type="text/javascript">
+	var loggerPort = location.href.substring(location.href.indexOf('=') + 1).replace(/&ch=.*$/, '');
+
+	$(window).unload(function () {
+		$.ajax({
+			url: 'http://localhost:' + loggerPort + '/', 
+			type: 'POST',
+			async: false,
+			data: "END"
+		});
+	});
+	
 	(function ($) {
 		$(function () {
 			var channels = location.href.substring(location.href.lastIndexOf('=') + 1).split(',');
-			var loggerPort = location.href.substring(location.href.indexOf('=') + 1).replace(/&ch=.*$/, '');
 
-			$('#result').append('<ol/>');
+			$('#result').append('<div id="total_bar"/><ol/>');
+			var total_bar = new html5jp.progress("total_bar", {to: 0});
+			total_bar.draw();
 
 			function f(i) {
 				if (i == -1) {
@@ -35,11 +48,17 @@
 					window.close();
 					return;
 				}
+				
+				total_bar.set_val(100. * i / channels.length);
+				
 				var ch = channels[i];
 				var url = 'http://www.hikaritv.net/search/tv/request/00/tv_epg_weekly/timeRange=24&dayRange=8&serviceID=' + ch + '&chRange=1&selCh=' + ch + '.html';
 				//var url = 'http://www.hikaritv.net/search/tv/request/00/tv_epg_weekly/timeRange%3D24%26dayRange%3D8%26serviceID%3D' + ch + '%26chRange%3D1%26selCh%3D' + ch + '.html';
 				
-				$('#result ol').append('<li>channel ' + ch + '</li>');
+				$('#result ol').append('<li>channel ' + ch + '<span id="result_num' + i + '"/><div style="display: inline-block;" id="result_bar' + i + '"/></li>');
+				
+				var progress_bar = new html5jp.progress("result_bar" + i, {to: 0});
+				progress_bar.draw();
 
 				var result = "";
 				var jobs = null;
@@ -160,7 +179,8 @@
 									dataType: 'text',
 									cache: true,
 									success: function (data) {
-										$('#result ol li:last').text('channel ' + ch + ' (' + (allJobNum - jobs.length) + '/' + allJobNum + ')');
+										$('#result ol li:last #result_num' + i).text(' (' + (allJobNum - jobs.length) + '/' + allJobNum + ')');
+										progress_bar.set_val(100. * (allJobNum - jobs.length) / + allJobNum);
 										output(getCsv(data, getCrid(job)));
 										isLoading = false;
 										job = null;
