@@ -1,0 +1,45 @@
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>ひかりTVプラグイン設定</title>
+</head>
+
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+	function save_options() {
+		localStorage["username"] = $('#username').val();
+		localStorage["password"] = $('#password').val();
+
+		$('#status').html("保存しました");
+		setTimeout(
+			function () {
+				$('#status').html('');
+			},
+			750
+		);
+	}
+
+	// Restores select box state to saved value from localStorage.
+	function restore_options() {
+		var username = localStorage["username"] || "ユーザー名";
+		var password = localStorage["password"] || "パスワード";
+
+		$('#username').val(username);
+		$('#password').val(password);
+	}
+</script>
+
+<body onload="restore_options()">
+	ひかりTVプラグイン設定
+	<br><br>
+	ユーザー名:
+	<input type="text" id="username"/>
+	<br>
+	パスワード:
+	<input type="password" id="password"/>
+	<br>
+	<button onclick="save_options()">保存</button>
+	<br>
+	<div id="status"/>
+</body>
+</html>
