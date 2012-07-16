@@ -6,18 +6,19 @@
 <script type="text/javascript" src="config.js"></script>
 <script type="text/javascript" src="progress.js"></script>
 <script type="text/javascript">
-	var loggerPort = location.href.substring(location.href.indexOf('=') + 1).replace(/&ch=.*$/, '');
 
-	$(window).unload(function () {
-		$.ajax({
-			url: 'http://localhost:' + loggerPort + '/', 
-			type: 'POST',
-			async: false,
-			data: "END"
-		});
-	});
-	
 	(function ($) {
+		var loggerPort = location.href.substring(location.href.indexOf('=') + 1).replace(/&ch=.*$/, '');
+
+		$(window).unload(function () {
+			$.ajax({
+				url: 'http://localhost:' + loggerPort + '/', 
+				type: 'POST',
+				async: false,
+				data: "END"
+			});
+		});
+	
 		$(function () {
 			var channels = location.href.substring(location.href.lastIndexOf('=') + 1).split(',');
 
@@ -25,29 +26,27 @@
 			var total_bar = new html5jp.progress("total_bar", {to: 0});
 			total_bar.draw();
 
-			function f(i) {
-				if (i == -1) {
-					var header = '"開始時間","チャンネル","終了時間","番組名","内容","カテゴリー","URL","GCODE",優先度,"文字予備",空列\n';
-					$.ajax({
-						url: 'http://localhost:' + loggerPort + '/', 
-						type: 'POST',
-						async: false,
-						data: header
-					});
-					f(0);
-					return;
-				}
+			var header = '"開始時間","チャンネル","終了時間","番組名","内容","カテゴリー","URL","GCODE",優先度,"文字予備",空列\n';
+			$.ajax({
+				url: 'http://localhost:' + loggerPort + '/', 
+				type: 'POST',
+				async: false,
+				data: header
+			});
 
+			var i = -1;
+			function main_loop(i) {
 				if (i >= channels.length) {
 					$.ajax({
 						url: 'http://localhost:' + loggerPort + '/', 
 						type: 'POST',
-						async: false,
-						data: "END"
+					async: false,
+					data: "END"
 					});
 					window.close();
 					return;
 				}
+				
 				
 				total_bar.set_val(100. * i / channels.length);
 				
@@ -70,7 +69,7 @@
 					async: false,
 					dataType: 'text',
 				    success: function (data) {
-						jobs = $.makeArray($(data).find('.topHead ~ tr td p > a')); //.slice(0, 10);
+						jobs = $.makeArray($(data).find('.topHead ~ tr td p > a')); // .slice(0, 10); //
 						allJobNum = jobs.length;
 					},
 					error: function (x,y,z) {
@@ -84,24 +83,24 @@
 				}
 				
 				function getURL(job) {
-					var href = job.attr('href');
+					var href = $(job).attr('href');
 					return 'http://www.hikaritv.net' + href.substring(href.indexOf('/'));
 				}
 
 				function getCrid(job) {
-					var href = job.attr('href');
+					var href = $(job).attr('href');
 					return href.replace(/^.*crid%3D/, '').replace(/\.html/, '');
 				}
 
-				function getCsv(data, crid) {
+				function getCsv(data, crid, url) {
 					var d = $(data);
 
 					var title = d.find('.h2C02 h2:eq(0)').text().toString().replace(/...$/, '');
-					var time = d.find('.introBox dd:eq(0) strong').text();
-					var channel = d.find('.introBox dd:eq(1) strong').text().replace(/^[^0-9]*/, '').replace(/[^0-9]*$/, '');
-					var url = d.find('.introBox dd:eq(2) a').text();
-					var category = d.find('.introBox dd:eq(3)').text();
-					var description = d.find('.introBox dd:eq(4)').text(); //.replace(",", "，");
+					var time = d.find('.mainBox_left > p:eq(5) > strong').text();
+					var channel = d.find('.mainBox_rightin > p:eq(1)').text().replace(/^[^0-9]*/, '').replace(/[^0-9]*$/, '');
+					// var url = d.find('.introBox dd:eq(2) a').text();
+					var category = d.find('.mainBox_left > p:eq(3) > a').text();
+					var description = d.find('.mainBox_left > p:eq(1)').text(); //.replace(",", "，");
 					var gcode = '';
 					var priority = 0 | (1 << 28);
 					var reserve = '';
@@ -140,13 +139,8 @@
 						+ ',"' + reserve + '"'
 						+ ','
 						;
-					
 					return csv;
 				}
-
-				var N = config.numWorker;
-				var nWorkers = N;
-				var workers = [];
 
 				function output(line) {
 					if (line == '') return;
@@ -155,59 +149,43 @@
 					//throw "end";
 				}
 				
-				function makeWorker(self) {
-					var isLoading = false;
-					var done = false;
-					return function () {
-						if (done) {
-							if (nWorkers == 0) {
-								//console.log(result);
-								$.ajax({url: 'http://localhost:' + loggerPort + '/', type: 'POST', data: result, async: false});
-								f(i + 1);
-								return false;
-							}
-						} else if (!isLoading) {
-							var job = $(getJob());
-							if (job .length == 0) {
-								done = true;
-								nWorkers--;
-							} else {
-								$.ajax({
-									url: getURL(job),
-									type: 'GET',
-									async: true,
-									dataType: 'text',
-									cache: true,
-									success: function (data) {
-										$('#result ol li:last #result_num' + i).text(' (' + (allJobNum - jobs.length) + '/' + allJobNum + ')');
-										progress_bar.set_val(100. * (allJobNum - jobs.length) / + allJobNum);
-										output(getCsv(data, getCrid(job)));
-										isLoading = false;
-										job = null;
-									},
-									error: function (x,y,z) {
-										console.log('NG:' + x + y + z);
-										isLoading = false;
-										job = null;
-									}
-								});
-								isLoading = true; 
-							}
+				var q = $.map(jobs, function (job, j) {
+					return {
+						url: getURL(job),
+						type: 'GET',
+						async: true,
+						dataType: 'text',
+						cache: true,
+						success: function (data) {
+							$('#result ol li:last #result_num' + i).text(' (' + j + '/' + allJobNum + ')');
+							progress_bar.set_val(100. * j / allJobNum);
+							output(getCsv(data, getCrid(job), getURL(job)));
+							loop();
+						},
+						error: function (x,y,z) {
+							console.log('NG:' + x + y + z);
 						}
-						var next = (self + 1) % N;
-						setTimeout(workers[next], 10);
-
-						return true;
 					};
+				});
+				
+				function loop () {
+					if (q.length == 0) {
+						$.ajax({
+							url: 'http://localhost:' + loggerPort + '/', type: 'POST', data: result, async: false,
+							success: function () {
+								main_loop(i + 1);
+								
+							}
+						});
+					} else {
+						var p = q.shift();
+						$.ajax(p);
+					}
 				}
-
-				for (var j = 0; j < N; ++j) {
-					workers.push(makeWorker(j));
-				}
-				//result = "";
-				workers[0]();
+				loop(q);
 			}
-			setTimeout(function () { f(-1); }, 2000);
+
+			main_loop(0);
 		});
 	}(window.$));
 </script>
