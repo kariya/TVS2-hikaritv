@@ -72,3 +72,7 @@ BSDライセンス
 ## 変更履歴
 + 2012.7/16 ひかりTVのhtml構成変更に対応。データ取得方法を同期的に。
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kariya/tvs2-hikaritv/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
