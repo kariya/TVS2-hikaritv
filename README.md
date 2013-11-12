@@ -1,4 +1,3 @@
-
 # ＴＶスケジューラー用ひかりTVプラグイン
 [ＴＶスケジューラー](http://www.valsoft.jp/delphi/tvs2hp.html)用の
 [ひかりTV](http://www.hikaritv.net/)プラグインです。
@@ -75,4 +74,4 @@ BSDライセンス
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kariya/tvs2-hikaritv/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
+<img src="https://git.kariya.cc/myBadge3.png"/>
